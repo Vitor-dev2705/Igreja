@@ -11,8 +11,12 @@ import {
   CardContent,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import GroupIcon from '@mui/icons-material/Group'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 
@@ -20,6 +24,7 @@ export default function MembrosDashboard() {
   const [membros, setMembros] = useState([])
   const [novo, setNovo] = useState({ nome: '', email: '', telefone: '' })
   const [alerta, setAlerta] = useState({ open: false, tipo: 'success', mensagem: '' })
+  const [membroSelecionado, setMembroSelecionado] = useState(null) // modal
 
   // Carrega membros do backend
   useEffect(() => {
@@ -149,6 +154,8 @@ export default function MembrosDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 layout
+                onClick={() => setMembroSelecionado(m)}
+                style={{ cursor: 'pointer' }}
               >
                 <Card
                   sx={{
@@ -173,6 +180,26 @@ export default function MembrosDashboard() {
           ))}
         </AnimatePresence>
       </Grid>
+
+      {/* Modal de detalhes do membro */}
+      <Dialog
+        open={Boolean(membroSelecionado)}
+        onClose={() => setMembroSelecionado(null)}
+      >
+        <DialogTitle>Detalhes do Membro</DialogTitle>
+        <DialogContent dividers>
+          {membroSelecionado && (
+            <>
+              <Typography sx={{ mb: 1 }}><strong>Nome:</strong> {membroSelecionado.nome}</Typography>
+              <Typography sx={{ mb: 1 }}><strong>Email:</strong> {membroSelecionado.email}</Typography>
+              <Typography sx={{ mb: 1 }}><strong>Telefone:</strong> {membroSelecionado.telefone || '—'}</Typography>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMembroSelecionado(null)}>Fechar</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Alertas */}
       <Snackbar

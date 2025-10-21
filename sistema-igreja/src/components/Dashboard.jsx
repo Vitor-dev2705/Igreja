@@ -33,6 +33,10 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { motion } from 'framer-motion'
 
+// Criando componentes animados a partir do Material-UI
+const MotionCard = motion(Card)
+const MotionPaper = motion(Paper)
+
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState({
     vendasHoje: 0,
@@ -131,29 +135,29 @@ export default function Dashboard() {
             { cor: cardColors[3], titulo: 'Faturamento do Mês', valor: dashboard.pagamentoMes, icone: <AttachMoneyIcon sx={{ fontSize: 45, color: '#9370DB' }} /> },
           ].map((card, idx) => (
             <Grid item xs={12} sm={6} md={3} key={idx}>
-              <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
-                <Card
-                  sx={{
-                    p: 4,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderRadius: 16,
-                    boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
-                    background: card.cor,
-                  }}
-                >
-                  <Box>
-                    <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#2c3e50' }}>
-                      {card.titulo}
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mt: 1, color: '#2c3e50' }}>
-                      {card.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </Typography>
-                  </Box>
-                  {card.icone}
-                </Card>
-              </motion.div>
+              <MotionCard
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                sx={{
+                  p: 4,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderRadius: 16,
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+                  background: card.cor,
+                }}
+              >
+                <Box>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#2c3e50' }}>
+                    {card.titulo}
+                  </Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mt: 1, color: '#2c3e50' }}>
+                    {card.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </Typography>
+                </Box>
+                {card.icone}
+              </MotionCard>
             </Grid>
           ))}
         </Grid>
@@ -162,76 +166,82 @@ export default function Dashboard() {
         <Grid container spacing={4} sx={{ mt: 4 }}>
           {/* Receita x Despesa */}
           <Grid item xs={12} md={8}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <Paper sx={{ p: 4, borderRadius: 16, boxShadow: '0 6px 20px rgba(0,0,0,0.15)', background: '#fff' }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2c3e50' }}>
-                  Receita x Despesa
-                </Typography>
-                <ResponsiveContainer width="100%" height={350}>
-                  <AreaChart data={dashboard.receitaDespesaData}>
-                    <defs>
-                      {['#FF7F50', '#FFA500', '#1E90FF', '#9370DB'].map((cor, i) => (
-                        <linearGradient key={i} id={`color${i}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={cor} stopOpacity={0.4} />
-                          <stop offset="95%" stopColor={cor} stopOpacity={0.1} />
-                        </linearGradient>
-                      ))}
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="mes" stroke="#7f8c8d" />
-                    <YAxis stroke="#7f8c8d" />
-                    <Tooltip />
-                    <Legend />
-                    <Area type="monotone" dataKey="2022" stroke="#FF7F50" fill="url(#color0)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="2023" stroke="#FFA500" fill="url(#color1)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="2024" stroke="#1E90FF" fill="url(#color2)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="2025" stroke="#9370DB" fill="url(#color3)" strokeWidth={2} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </Paper>
-            </motion.div>
+            <MotionPaper
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              sx={{ p: 4, borderRadius: 16, boxShadow: '0 6px 20px rgba(0,0,0,0.15)', background: '#fff' }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2c3e50' }}>
+                Receita x Despesa
+              </Typography>
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={dashboard.receitaDespesaData}>
+                  <defs>
+                    {['#FF7F50', '#FFA500', '#1E90FF', '#9370DB'].map((cor, i) => (
+                      <linearGradient key={i} id={`color${i}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={cor} stopOpacity={0.4} />
+                        <stop offset="95%" stopColor={cor} stopOpacity={0.1} />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="mes" stroke="#7f8c8d" />
+                  <YAxis stroke="#7f8c8d" />
+                  <Tooltip />
+                  <Legend />
+                  <Area type="monotone" dataKey="2022" stroke="#FF7F50" fill="url(#color0)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="2023" stroke="#FFA500" fill="url(#color1)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="2024" stroke="#1E90FF" fill="url(#color2)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="2025" stroke="#9370DB" fill="url(#color3)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </MotionPaper>
           </Grid>
 
           {/* Despesas por Categoria */}
           <Grid item xs={12} md={4}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}>
-              <Paper sx={{ p: 4, borderRadius: 16, boxShadow: '0 6px 20px rgba(0,0,0,0.15)', background: '#fff' }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2c3e50' }}>
-                  Despesas por Categoria
-                </Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={dashboard.despesasPorCategoria}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="valor"
-                    >
-                      {dashboard.despesasPorCategoria.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.cor} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <Divider sx={{ my: 2 }} />
-                <Grid container spacing={1}>
-                  {dashboard.despesasPorCategoria.map((cat, idx) => (
-                    <Grid item xs={6} key={idx}>
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: cat.cor }} />
-                        <Typography variant="caption" sx={{ fontSize: 13, color: '#2c3e50' }}>
-                          {cat.nome}
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Paper>
-            </motion.div>
+            <MotionPaper
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              sx={{ p: 4, borderRadius: 16, boxShadow: '0 6px 20px rgba(0,0,0,0.15)', background: '#fff' }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2c3e50' }}>
+                Despesas por Categoria
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={dashboard.despesasPorCategoria}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="valor"
+                  >
+                    {dashboard.despesasPorCategoria.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.cor} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
+              </ResponsiveContainer>
+              <Divider sx={{ my: 2 }} />
+              <Grid container spacing={1}>
+                {dashboard.despesasPorCategoria.map((cat, idx) => (
+                  <Grid item xs={6} key={idx}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: cat.cor }} />
+                      <Typography variant="caption" sx={{ fontSize: 13, color: '#2c3e50' }}>
+                        {cat.nome}
+                      </Typography>
+                    </Stack>
+                  </Grid>
+                ))}
+              </Grid>
+            </MotionPaper>
           </Grid>
         </Grid>
       </Box>
