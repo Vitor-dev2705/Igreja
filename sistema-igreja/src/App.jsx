@@ -11,7 +11,8 @@ import {
   Typography,
   IconButton,
   Divider,
-  Tooltip
+  Tooltip,
+  Avatar,
 } from '@mui/material';
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -20,6 +21,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import EventIcon from '@mui/icons-material/Event';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import Dashboard from './components/Dashboard';
 import Membros from './components/Membros';
@@ -43,22 +45,33 @@ export default function App() {
   ];
 
   return (
-    <Box sx={{ display: 'flex', bgcolor: '#f3f6fc', minHeight: '100vh', width: '100vw' }}>
+    <Box sx={{ display: 'flex', bgcolor: '#f3f3f5ff', minHeight: '100vh', width: '100vw' }}>
       {/* Barra superior */}
       <AppBar
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          bgcolor: '#1976d2',
+          bgcolor: '#5d5959',
+          borderBottom: '1px solid #ffffffff',
+          color: '#0a1a3b',
           width: `calc(100% - ${aberto ? drawerWidth : drawerCollapsed}px)`,
           left: `${aberto ? drawerWidth : drawerCollapsed}px`,
           transition: 'all 0.3s ease',
         }}
       >
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Título à esquerda */}
           <Typography variant="h6" noWrap>
             Comunidade Nossa Senhora do Perpétuo Socorro
           </Typography>
+
+          {/* Avatar e engrenagem à direita */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton>
+              <SettingsIcon sx={{ color: '#fff' }} />
+            </IconButton>
+            <Avatar alt="Usuário" src="/avatar.png" />
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -72,11 +85,11 @@ export default function App() {
           '& .MuiDrawer-paper': {
             width: aberto ? drawerWidth : drawerCollapsed,
             boxSizing: 'border-box',
-            bgcolor: '#0d214f',
-            color: '#fff',
+            bgcolor: '#5d5959',
+            color: '#000000ff',
             transition: 'all 0.3s ease',
             overflowX: 'hidden',
-            borderRight: '1px solid #0a1a3b',
+            borderRight: '1px solid #ffffffff',
           },
         }}
       >
@@ -113,11 +126,11 @@ export default function App() {
                 onClick={() => setPagina(item.id)}
                 sx={{
                   mb: 1,
-                  borderRadius: '8px',
+                  borderRadius: '80px',
                   mx: 1,
                   px: aberto ? 2 : 1,
-                  bgcolor: pagina === item.id ? '#1150c5' : 'transparent',
-                  '&:hover': { bgcolor: '#0e3a94' },
+                  bgcolor: pagina === item.id ? '#fff' : 'transparent',
+                  '&:hover': { bgcolor: '#fff' },
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   flexDirection: aberto ? 'row' : 'column',
@@ -147,9 +160,9 @@ export default function App() {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: '#f3f6fc',
-          p: 3,
-          pt: 10,
+          bgcolor: '#fff',
+          p: 1,
+          mt: 7,
           overflowY: 'auto',
           minHeight: '100vh',
           transition: 'margin 0.3s ease',

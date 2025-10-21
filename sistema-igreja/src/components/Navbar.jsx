@@ -74,14 +74,14 @@ export default function App() {
           whiteSpace: 'nowrap',
           transition: 'width 0.3s',
           '& .MuiDrawer-paper': {
-            width: aberto ? drawerWidth : drawerCollapsed,
-            boxSizing: 'border-box',
-            bgcolor: '#f0f4f8',
-            color: '#000',
-            overflowX: 'hidden',
-            borderRight: '1px solid #d1d9e6',
-            transition: 'width 0.3s',
-          },
+              width: aberto ? drawerWidth : drawerCollapsed,
+              boxSizing: 'border-box',
+              bgcolor: '#ffffffff', // fundo branco
+              color: '#000000',   // textos pretos
+              overflowX: 'hidden',
+              borderRight: '1px solid #d1d9e6',
+              transition: 'width 0.3s',
+            },
         }}
       >
         {/* Logo e botão */}
