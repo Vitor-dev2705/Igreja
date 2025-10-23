@@ -32,6 +32,17 @@ import Fundos from './components/Fundos';
 const drawerWidth = 240;
 const drawerCollapsed = 75;
 
+// 🎨 Paleta baseada na logo
+const colors = {
+  primary: '#007B83', 
+  secondary: '#4DB6AC', 
+  background: '#F7F9FA', 
+  surface: '#FFFFFF', 
+  textPrimary: '#2C3E50',
+  textSecondary: '#607D8B',
+  accent: '#A7FFEB', 
+};
+
 export default function App() {
   const [pagina, setPagina] = useState('dashboard');
   const [aberto, setAberto] = useState(true);
@@ -45,37 +56,39 @@ export default function App() {
   ];
 
   return (
-    <Box sx={{ display: 'flex', bgcolor: '#f3f3f5ff', minHeight: '100vh', width: '100vw' }}>
-      {/* Barra superior */}
+    <Box sx={{ display: 'flex', bgcolor: colors.background, minHeight: '100vh', width: '100vw' }}>
+      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          bgcolor: '#5d5959',
-          borderBottom: '1px solid #ffffffff',
-          color: '#0a1a3b',
+          bgcolor: colors.primary,
+          color: colors.surface,
           width: `calc(100% - ${aberto ? drawerWidth : drawerCollapsed}px)`,
           left: `${aberto ? drawerWidth : drawerCollapsed}px`,
           transition: 'all 0.3s ease',
+          boxShadow: '0 3px 10px rgba(0,0,0,0.1)',
         }}
       >
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {/* Título à esquerda */}
-          <Typography variant="h6" noWrap>
-            Comunidade Nossa Senhora do Perpétuo Socorro
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" noWrap fontWeight={600} sx={{ color: colors.surface }}>
+              Comunidade Nossa Senhora do Perpétuo Socorro
+            </Typography>
+          </Box>
 
-          {/* Avatar e engrenagem à direita */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton>
-              <SettingsIcon sx={{ color: '#fff' }} />
-            </IconButton>
+            <Tooltip title="Configurações">
+              <IconButton>
+                <SettingsIcon sx={{ color: colors.surface }} />
+              </IconButton>
+            </Tooltip>
             <Avatar alt="Usuário" src="/avatar.png" />
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* Menu lateral */}
+      {/* Drawer */}
       <Drawer
         variant="permanent"
         sx={{
@@ -85,15 +98,14 @@ export default function App() {
           '& .MuiDrawer-paper': {
             width: aberto ? drawerWidth : drawerCollapsed,
             boxSizing: 'border-box',
-            bgcolor: '#5d5959',
-            color: '#000000ff',
+            background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+            color: '#fff',
             transition: 'all 0.3s ease',
             overflowX: 'hidden',
-            borderRight: '1px solid #ffffffff',
+            borderRight: '1px solid rgba(255,255,255,0.2)',
           },
         }}
       >
-        {/* Logo e botão */}
         <Toolbar
           sx={{
             display: 'flex',
@@ -104,20 +116,21 @@ export default function App() {
         >
           {aberto ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <img src="/logo.png" alt="Logo" style={{ height: 40 }} />
-              <Typography variant="h6">Menu</Typography>
+              <img src="/logo.png" alt="Logo" style={{ height: 40, borderRadius: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: colors.surface }}>
+                Menu
+              </Typography>
             </Box>
           ) : (
-            <img src="/logo.png" alt="Logo" style={{ height: 35 }} />
+            <img src="/logo.png" alt="Logo" style={{ height: 35, borderRadius: 8 }} />
           )}
-          <IconButton onClick={() => setAberto(!aberto)} sx={{ color: '#fff' }}>
+          <IconButton onClick={() => setAberto(!aberto)} sx={{ color: colors.surface }}>
             {aberto ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
         </Toolbar>
 
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
 
-        {/* Itens do menu */}
         <List sx={{ mt: 2 }}>
           {menuItems.map((item) => (
             <Tooltip key={item.id} title={!aberto ? item.label : ''} placement="right">
@@ -129,9 +142,12 @@ export default function App() {
                   borderRadius: '80px',
                   mx: 1,
                   px: aberto ? 2 : 1,
-                  bgcolor: pagina === item.id ? '#fff' : 'transparent',
-                  '&:hover': { bgcolor: '#fff' },
-                  transition: 'all 0.2s ease',
+                  bgcolor: pagina === item.id ? colors.surface : 'transparent',
+                  color: pagina === item.id ? colors.primary : colors.surface,
+                  '&:hover': {
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                  },
+                  transition: 'all 0.25s ease',
                   display: 'flex',
                   flexDirection: aberto ? 'row' : 'column',
                   justifyContent: 'center',
@@ -140,7 +156,7 @@ export default function App() {
               >
                 <ListItemIcon
                   sx={{
-                    color: '#fff',
+                    color: pagina === item.id ? colors.primary : colors.surface,
                     minWidth: aberto ? '40px' : 'auto',
                     display: 'flex',
                     justifyContent: 'center',
@@ -148,23 +164,35 @@ export default function App() {
                 >
                   {item.icon}
                 </ListItemIcon>
-                {aberto && <ListItemText primary={item.label} sx={{ ml: 1 }} />}
+                {aberto && (
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      ml: 1,
+                      fontWeight: pagina === item.id ? 700 : 400,
+                      color: pagina === item.id ? colors.primary : colors.surface,
+                    }}
+                  />
+                )}
               </ListItemButton>
             </Tooltip>
           ))}
         </List>
       </Drawer>
 
-      {/* Conteúdo principal */}
+      {/* Conteúdo */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: '#fff',
-          p: 1,
+          bgcolor: colors.surface,
+          p: 3,
           mt: 7,
           overflowY: 'auto',
           minHeight: '100vh',
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          boxShadow: '0 -4px 10px rgba(0,0,0,0.05)',
           transition: 'margin 0.3s ease',
         }}
       >

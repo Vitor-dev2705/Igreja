@@ -117,10 +117,6 @@ export default function Dashboard() {
               <MenuItem value="Mensal">Mensal</MenuItem>
               <MenuItem value="Anual">Anual</MenuItem>
             </Select>
-            <IconButton>
-              <SettingsIcon sx={{ color: '#2c3e50' }} />
-            </IconButton>
-            <Avatar alt="Usuário" src="/avatar.png" />
           </Stack>
         </Toolbar>
       </AppBar>

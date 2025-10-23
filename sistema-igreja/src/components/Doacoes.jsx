@@ -1,25 +1,29 @@
 import { useState, useEffect } from 'react'
 import { get, post } from '../api'
-import { 
-  Box, 
-  Button, 
-  TextField, 
-  MenuItem, 
-  Select, 
-  InputLabel, 
-  FormControl, 
-  Typography, 
-  Paper, 
-  Stack, 
-  Grid 
+import {
+  Box,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Typography,
+  Paper,
+  Stack,
+  Grid,
+  Snackbar,
+  Alert,
+  Divider
 } from '@mui/material'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Doacoes() {
   const [doacoes, setDoacoes] = useState([])
   const [fundos, setFundos] = useState([])
   const [membros, setMembros] = useState([])
-  const [nova, setNova] = useState({ valor:'', data:'', fundo:'', membroId:'', obs:'' })
+  const [nova, setNova] = useState({ valor: '', data: '', fundo: '', membroId: '', obs: '' })
+  const [alerta, setAlerta] = useState({ open: false, msg: '', tipo: 'success' })
 
   useEffect(() => {
     get('doacoes').then(setDoacoes)
@@ -28,10 +32,14 @@ export default function Doacoes() {
   }, [])
 
   function adicionar() {
-    if(!nova.valor || !nova.data || !nova.fundo || !nova.membroId) return
+    if (!nova.valor || !nova.data || !nova.fundo || !nova.membroId) {
+      setAlerta({ open: true, msg: 'Preencha todos os campos obrigatórios.', tipo: 'warning' })
+      return
+    }
     post('doacoes', nova).then(d => {
       setDoacoes([...doacoes, d])
-      setNova({ valor:'', data:'', fundo:'', membroId:'', obs:'' })
+      setNova({ valor: '', data: '', fundo: '', membroId: '', obs: '' })
+      setAlerta({ open: true, msg: 'Doação adicionada com sucesso!', tipo: 'success' })
     })
   }
 
@@ -43,13 +51,24 @@ export default function Doacoes() {
   const cores = ['#2ecc71', '#3498db', '#e67e22', '#9b59b6', '#e74c3c', '#1abc9c']
   const getCorFundo = (fundo) => {
     const index = fundos.findIndex(f => f.nome === fundo)
-    return cores[index % cores.length] + '33'
+    return cores[index % cores.length] + '22'
   }
 
   return (
-    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 5, px: 2 }}>
-      <Paper sx={{ p: 3, mb: 5 }}>
-        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>Registrar Doações</Typography>
+    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 6, mb: 8, px: 2 }}>
+      {/* Formulário */}
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 4,
+          background: '#fafafa'
+        }}
+      >
+        <Typography variant="h5" sx={{ mb: 2, fontWeight: 700, color: '#2c3e50' }}>
+          💰 Registrar Nova Doação
+        </Typography>
+        <Divider sx={{ mb: 3 }} />
 
         <Stack spacing={2}>
           <TextField
@@ -58,6 +77,7 @@ export default function Doacoes() {
             value={nova.valor}
             onChange={e => setNova({ ...nova, valor: e.target.value })}
             fullWidth
+            variant="outlined"
           />
 
           <TextField
@@ -66,6 +86,7 @@ export default function Doacoes() {
             onChange={e => setNova({ ...nova, data: e.target.value })}
             fullWidth
             InputLabelProps={{ shrink: true }}
+            label="Data"
           />
 
           <FormControl fullWidth>
@@ -76,7 +97,9 @@ export default function Doacoes() {
               onChange={e => setNova({ ...nova, fundo: e.target.value })}
             >
               <MenuItem value="">Selecione o Fundo</MenuItem>
-              {fundos.map(f => <MenuItem key={f.id} value={f.nome}>{f.nome}</MenuItem>)}
+              {fundos.map(f => (
+                <MenuItem key={f.id} value={f.nome}>{f.nome}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
@@ -88,7 +111,9 @@ export default function Doacoes() {
               onChange={e => setNova({ ...nova, membroId: e.target.value })}
             >
               <MenuItem value="">Selecione o Membro</MenuItem>
-              {membros.map(m => <MenuItem key={m.id} value={m.id}>{m.nome}</MenuItem>)}
+              {membros.map(m => (
+                <MenuItem key={m.id} value={m.id}>{m.nome}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
@@ -97,53 +122,93 @@ export default function Doacoes() {
             value={nova.obs}
             onChange={e => setNova({ ...nova, obs: e.target.value })}
             fullWidth
+            multiline
+            rows={2}
           />
 
-          <Button variant="contained" color="primary" onClick={adicionar}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ mt: 1, borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+            onClick={adicionar}
+          >
             Adicionar Doação
           </Button>
         </Stack>
       </Paper>
 
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Lista de Doações</Typography>
+      {/* Lista */}
+      <Typography
+        variant="h6"
+        sx={{ mt: 6, mb: 3, fontWeight: 700, color: '#34495e', textAlign: 'center' }}
+      >
+        📋 Lista de Doações
+      </Typography>
+
       <Grid container spacing={3}>
         {doacoes.length === 0 && (
           <Grid item xs={12}>
-            <Typography sx={{ textAlign: 'center', color: 'gray' }}>Nenhuma doação registrada.</Typography>
+            <Typography sx={{ textAlign: 'center', color: 'gray' }}>
+              Nenhuma doação registrada.
+            </Typography>
           </Grid>
         )}
-        {doacoes.map(d => (
-          <Grid item xs={12} sm={6} key={d.id}>
-            <motion.div
-              whileHover={{ scale: 1.03, boxShadow: '0 8px 20px rgba(0,0,0,0.15)' }}
-              transition={{ duration: 0.3 }}
-            >
-              <Paper sx={{
-                p: 2,
-                borderRadius: 3,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                background: getCorFundo(d.fundo)
-              }}>
-                <Stack spacing={1}>
-                  <Typography sx={{ fontWeight: 700, fontSize: 16 }}>
-                    R$ {Number(d.valor).toLocaleString('pt-BR')}
-                  </Typography>
-                  <Typography sx={{ fontSize: 14 }}>
-                    Data: <strong>{d.data}</strong>
-                  </Typography>
-                  <Typography sx={{ fontSize: 14 }}>
-                    Fundo: <strong>{d.fundo}</strong>
-                  </Typography>
-                  <Typography sx={{ fontSize: 14 }}>
-                    Membro: <strong>{getMembroNome(d.membroId)}</strong>
-                  </Typography>
-                  {d.obs && <Typography sx={{ fontSize: 13, fontStyle: 'italic', color: '#555' }}>Obs: {d.obs}</Typography>}
-                </Stack>
-              </Paper>
-            </motion.div>
-          </Grid>
-        ))}
+
+        <AnimatePresence>
+          {doacoes.map((d, i) => (
+            <Grid item xs={12} sm={6} md={4} key={d.id}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, delay: i * 0.05 }}
+              >
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 3,
+                    background: getCorFundo(d.fundo),
+                    backdropFilter: 'blur(4px)',
+                    transition: 'all 0.3s',
+                    '&:hover': {
+                      transform: 'scale(1.03)',
+                      boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+                    }
+                  }}
+                >
+                  <Stack spacing={1}>
+                    <Typography sx={{ fontWeight: 700, fontSize: 18 }}>
+                      R$ {Number(d.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </Typography>
+                    <Typography sx={{ fontSize: 14 }}>📅 {d.data}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>🏦 Fundo: <strong>{d.fundo}</strong></Typography>
+                    <Typography sx={{ fontSize: 14 }}>👤 {getMembroNome(d.membroId)}</Typography>
+                    {d.obs && (
+                      <Typography sx={{ fontSize: 13, fontStyle: 'italic', color: '#555' }}>
+                        📝 {d.obs}
+                      </Typography>
+                    )}
+                  </Stack>
+                </Paper>
+              </motion.div>
+            </Grid>
+          ))}
+        </AnimatePresence>
       </Grid>
+
+      {/* Alerta */}
+      <Snackbar
+        open={alerta.open}
+        autoHideDuration={3000}
+        onClose={() => setAlerta({ ...alerta, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setAlerta({ ...alerta, open: false })} severity={alerta.tipo} variant="filled">
+          {alerta.msg}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
