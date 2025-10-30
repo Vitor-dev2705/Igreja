@@ -16,7 +16,7 @@ import {
   Alert,
   Divider
 } from '@mui/material'
-import { motion, AnimatePresence } from 'framer-motion'
+import {  AnimatePresence } from 'framer-motion'
 
 export default function Doacoes() {
   const [doacoes, setDoacoes] = useState([])
