@@ -30,7 +30,7 @@ export default function MembrosDashboard() {
   });
   const [membroSelecionado, setMembroSelecionado] = useState(null);
 
-  // 🔹 Carrega membros
+  // Carrega membros
   useEffect(() => {
     carregarMembros();
   }, []);
@@ -48,7 +48,7 @@ export default function MembrosDashboard() {
     }
   }
 
-  // 🔹 Adiciona novo membro
+  // Adiciona novo membro
   async function adicionar() {
     if (!novo.nome || !novo.email) {
       setAlerta({
@@ -80,7 +80,7 @@ export default function MembrosDashboard() {
     }
   }
 
-  // 🔹 Estatísticas
+  // Estatísticas
   const hoje = new Date().toISOString().split("T")[0];
   const totalMembros = membros.length;
   const membrosHoje = membros.filter(
@@ -108,7 +108,7 @@ export default function MembrosDashboard() {
         Dashboard de Membros
       </Typography>
 
-      {/* 🔹 Cards */}
+      {/* ards */}
       <Grid
         container
         spacing={3}
@@ -165,7 +165,7 @@ export default function MembrosDashboard() {
         ))}
       </Grid>
 
-      {/* 🔹 Formulário */}
+      {/*Formulário */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
@@ -195,7 +195,7 @@ export default function MembrosDashboard() {
         </Button>
       </Stack>
 
-      {/* 🔹 Lista de membros */}
+      {/* Lista de membros */}
       <Grid
         container
         spacing={3}
@@ -234,7 +234,7 @@ export default function MembrosDashboard() {
         </AnimatePresence>
       </Grid>
 
-      {/* 🔹 Modal Detalhes */}
+      {/*Modal Detalhes */}
       <Dialog
         open={!!membroSelecionado}
         onClose={() => setMembroSelecionado(null)}
@@ -260,7 +260,7 @@ export default function MembrosDashboard() {
         </DialogActions>
       </Dialog>
 
-      {/* 🔹 Snackbar */}
+      {/*Snackbar */}
       <Snackbar
         open={alerta.open}
         autoHideDuration={3000}
