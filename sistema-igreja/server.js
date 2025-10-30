@@ -7,7 +7,6 @@ dotenv.config();
 
 const app = express();
 
-// 🧩 Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -16,7 +15,7 @@ const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASS || "",
-  database: process.env.DB_NAME || "igreja_db", // 👈 nome do banco fixo ou via .env
+  database: process.env.DB_NAME || "igreja_db",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
