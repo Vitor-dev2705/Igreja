@@ -15,6 +15,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import GroupIcon from "@mui/icons-material/Group";
@@ -62,7 +69,6 @@ export default function MembrosDashboard() {
     try {
       const m = await post("membros", novo);
 
-      // Corrigido: concatena corretamente o novo membro
       if (m && m.id) setMembros((prev) => [...prev, m]);
 
       setNovo({ nome: "", email: "", telefone: "" });
@@ -108,7 +114,7 @@ export default function MembrosDashboard() {
         Dashboard de Membros
       </Typography>
 
-      {/* ards */}
+      {/* cards */}
       <Grid
         container
         spacing={3}
@@ -165,7 +171,7 @@ export default function MembrosDashboard() {
         ))}
       </Grid>
 
-      {/*Formulário */}
+      {/*Formulário*/}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
@@ -190,49 +196,52 @@ export default function MembrosDashboard() {
           onChange={(e) => setNovo({ ...novo, telefone: e.target.value })}
           fullWidth
         />
-        <Button variant="contained" color="primary" onClick={adicionar}>
+        <Button variant="contained" color="primary" onClick={adicionar}
+        sx={{
+            height:56,
+            minwidth: 150,
+            fontSize:"10px",
+            fontFamily:"sans-serif",
+        }}
+        >
           Adicionar
         </Button>
       </Stack>
 
-      {/* Lista de membros */}
-      <Grid
-        container
-        spacing={3}
-        sx={{ maxWidth: 1000, justifyContent: "center" }}
-      >
-        <AnimatePresence>
-          {membros.map((m) => (
-            <Grid item xs={12} sm={6} md={4} key={m.id}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                layout
-                onClick={() => setMembroSelecionado(m)}
-                style={{ cursor: "pointer" }}
-              >
-                <Card
-                  sx={{
-                    p: 2,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    borderRadius: 3,
-                    background: "#fff",
-                    width: 250,
-                  }}
+      {/*Lista de membros em tabela*/}
+      <TableContainer component={Paper} sx={{ maxWidth: 800, mb: 5 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>Nome</strong></TableCell>
+              <TableCell><strong>Email</strong></TableCell>
+              <TableCell><strong>Telefone</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {membros.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} sx={{ textAlign: "center" }}>
+                  Nenhum membro cadastrado ainda.
+                </TableCell>
+              </TableRow>
+            ) : (
+              membros.map((m) => (
+                <TableRow
+                  key={m.id}
+                  hover
+                  onClick={() => setMembroSelecionado(m)}
+                  sx={{ cursor: "pointer" }}
                 >
-                  <CardContent>
-                    <Typography sx={{ fontWeight: 600 }}>{m.nome}</Typography>
-                    <Typography variant="body2">
-                      {m.email} — {m.telefone || "—"}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
-          ))}
-        </AnimatePresence>
-      </Grid>
+                  <TableCell>{m.nome}</TableCell>
+                  <TableCell>{m.email}</TableCell>
+                  <TableCell>{m.telefone || "—"}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/*Modal Detalhes */}
       <Dialog
