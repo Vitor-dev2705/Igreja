@@ -35,12 +35,10 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import Dashboard from './components/Dashboard';
-import Membros from './components/Membros';
 import Doacoes from './components/Doacoes';
 import Despesas from './components/Despesas';
 import Fundos from './components/Fundos';
 
-// 📏 Larguras
 const drawerWidth = 240;
 const drawerCollapsed = 75;
 const baseColor = '#3f51b5';
@@ -48,8 +46,6 @@ const baseColor = '#3f51b5';
 export default function App() {
   const [pagina, setPagina] = useState('dashboard');
   const [aberto, setAberto] = useState(true);
-
-  // 🔽 estados para menus expansíveis
   const [openPastoral, setOpenPastoral] = useState(false);
   const [openFinanceiro, setOpenFinanceiro] = useState(false);
   const [openAdmin, setOpenAdmin] = useState(false);
@@ -64,38 +60,48 @@ export default function App() {
         selected={pagina === item.id}
         onClick={() => setPagina(item.id)}
         sx={{
-          mb: 1,
-          borderRadius: '10px',
+          mb: 0.5,
+          borderRadius: '8px',
           mx: 1,
           px: aberto ? 2 : 1,
-          bgcolor: pagina === item.id ? 'rgba(255,255,255,0.2)' : 'transparent',
+          bgcolor: pagina === item.id ? 'rgba(255,255,255,0.15)' : 'transparent',
           color: '#fff',
-          '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' },
+          '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
           transition: 'all 0.25s ease',
+          height: 45,
           display: 'flex',
-          flexDirection: aberto ? 'row' : 'column',
-          justifyContent: 'center',
+          justifyContent: aberto ? 'flex-start' : 'center',
           alignItems: 'center',
         }}
       >
         <ListItemIcon
           sx={{
             color: '#fff',
-            minWidth: aberto ? '40px' : 'auto',
+            minWidth: 40,
+            mr: aberto ? 1.5 : 0,
             display: 'flex',
             justifyContent: 'center',
+            alignItems: 'center',
+            transition: 'all 0.25s ease',
           }}
         >
           {item.icon}
         </ListItemIcon>
-        {aberto && <ListItemText primary={item.label} />}
+        {aberto && (
+          <ListItemText
+            primary={item.label}
+            primaryTypographyProps={{
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          />
+        )}
       </ListItemButton>
     </Tooltip>
   );
 
   return (
     <Box sx={{ display: 'flex', bgcolor: '#f9f9f9', minHeight: '100vh', width: '100vw' }}>
-      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
@@ -123,7 +129,6 @@ export default function App() {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer */}
       <Drawer
         variant="permanent"
         sx={{
@@ -138,7 +143,6 @@ export default function App() {
           },
         }}
       >
-        {/* Cabeçalho */}
         <Toolbar sx={{ justifyContent: aberto ? 'space-between' : 'center', px: 2 }}>
           {aberto ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -156,18 +160,41 @@ export default function App() {
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
 
         <List sx={{ mt: 1 }}>
-          {/* Painel principal */}
           {renderItem({ label: 'Dashboard', icon: <DashboardIcon />, id: 'dashboard' })}
 
-          {/* Pastoral e Comunidade */}
-          <ListItemButton onClick={togglePastoral}>
-            <ListItemIcon sx={{ color: '#fff' }}><ChurchIcon /></ListItemIcon>
+          <ListItemButton
+            onClick={togglePastoral}
+            sx={{
+              mb: 0.5,
+              borderRadius: '8px',
+              mx: 1,
+              px: aberto ? 2 : 1,
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+              height: 45,
+              display: 'flex',
+              justifyContent: aberto ? 'flex-start' : 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ListItemIcon 
+              sx={{ 
+                color: '#fff',
+                minWidth: 40,
+                mr: aberto ? 1.5 : 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <ChurchIcon />
+            </ListItemIcon>
             {aberto && <ListItemText primary="Pastoral e Comunidade" />}
             {aberto && (openPastoral ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
           </ListItemButton>
+
           <Collapse in={openPastoral} timeout="auto" unmountOnExit>
             {[
-              { label: 'Membros', icon: <PeopleIcon />, id: 'membros' },
               { label: 'Voluntários', icon: <VolunteerActivismIcon />, id: 'voluntarios' },
               { label: 'Catequese', icon: <SchoolIcon />, id: 'catequese' },
               { label: 'Eventos', icon: <EventIcon />, id: 'eventos' },
@@ -175,12 +202,37 @@ export default function App() {
             ].map(renderItem)}
           </Collapse>
 
-          {/* Financeiro */}
-          <ListItemButton onClick={toggleFinanceiro}>
-            <ListItemIcon sx={{ color: '#fff' }}><AttachMoneyIcon /></ListItemIcon>
+          <ListItemButton
+            onClick={toggleFinanceiro}
+            sx={{
+              mb: 0.5,
+              borderRadius: '8px',
+              mx: 1,
+              px: aberto ? 2 : 1,
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+              height: 45,
+              display: 'flex',
+              justifyContent: aberto ? 'flex-start' : 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ListItemIcon 
+              sx={{ 
+                color: '#fff',
+                minWidth: 40,
+                mr: aberto ? 1.5 : 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <AttachMoneyIcon />
+            </ListItemIcon>
             {aberto && <ListItemText primary="Financeiro" />}
             {aberto && (openFinanceiro ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
           </ListItemButton>
+
           <Collapse in={openFinanceiro} timeout="auto" unmountOnExit>
             {[
               { label: 'Doações', icon: <AttachMoneyIcon />, id: 'doacoes' },
@@ -190,12 +242,37 @@ export default function App() {
             ].map(renderItem)}
           </Collapse>
 
-          {/* Administração */}
-          <ListItemButton onClick={toggleAdmin}>
-            <ListItemIcon sx={{ color: '#fff' }}><SettingsIcon /></ListItemIcon>
+          <ListItemButton
+            onClick={toggleAdmin}
+            sx={{
+              mb: 0.5,
+              borderRadius: '8px',
+              mx: 1,
+              px: aberto ? 2 : 1,
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+              height: 45,
+              display: 'flex',
+              justifyContent: aberto ? 'flex-start' : 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ListItemIcon 
+              sx={{ 
+                color: '#fff',
+                minWidth: 40,
+                mr: aberto ? 1.5 : 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <SettingsIcon />
+            </ListItemIcon>
             {aberto && <ListItemText primary="Administração" />}
             {aberto && (openAdmin ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
           </ListItemButton>
+
           <Collapse in={openAdmin} timeout="auto" unmountOnExit>
             {[
               { label: 'Inventário', icon: <InventoryIcon />, id: 'inventario' },
@@ -206,7 +283,6 @@ export default function App() {
         </List>
       </Drawer>
 
-      {/* Conteúdo principal */}
       <Box
         component="main"
         sx={{
@@ -221,11 +297,9 @@ export default function App() {
         }}
       >
         {pagina === 'dashboard' && <Dashboard />}
-        {pagina === 'membros' && <Membros />}
         {pagina === 'doacoes' && <Doacoes />}
         {pagina === 'despesas' && <Despesas />}
         {pagina === 'fundos' && <Fundos />}
-      
       </Box>
     </Box>
   );

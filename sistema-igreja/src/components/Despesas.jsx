@@ -1,211 +1,344 @@
 import { useState, useEffect } from 'react'
-import { get, post } from '../api'
+import { get, post, put, del } from '../api'
 import {
-  Box,
-  Button,
-  TextField,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Typography,
-  Paper,
-  Stack,
-  Grid,
-  Divider,
-  IconButton,
-  Tooltip,
-  Card,
-  CardContent,
-  CardHeader,
-  Avatar,
+  Box, Button, TextField, MenuItem, Select, InputLabel, FormControl,
+  Typography, Paper, Stack, Grid, Snackbar, Alert, Divider, IconButton,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@mui/material'
-import AddCircleIcon from '@mui/icons-material/AddCircle'
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 
-const MotionCard = motion(Card)
+const MotionPaper = motion(Paper)
+
+const categorias = [
+  'Salários',
+  'Energia',
+  'Água',
+  'Telefone',
+  'Internet',
+  'Manutenção',
+  'Material de Limpeza',
+  'Material de Escritório',
+  'Impostos',
+  'Outros'
+]
+
+const formasPagamento = ['Dinheiro', 'Pix', 'Cartão', 'TED', 'Boleto']
+const statusOptions = ['pendente', 'pago', 'cancelado']
 
 export default function Despesas() {
   const [despesas, setDespesas] = useState([])
-  const [fundos, setFundos] = useState([])
-  const [nova, setNova] = useState({ valor: '', data: '', fundo: '', categoria: '', obs: '' })
+  const [form, setForm] = useState({
+    descricao: '',
+    valor: '',
+    data: new Date().toISOString().split('T')[0],
+    categoria: '',
+    forma_pagamento: 'Dinheiro',
+    favorecido: '',
+    observacoes: '',
+    status: 'pendente'
+  })
+  const [editando, setEditando] = useState(null)
+  const [snack, setSnack] = useState({ open: false, msg: '', tipo: 'success' })
 
   useEffect(() => {
-    get('despesas').then(setDespesas)
-    get('fundos').then(setFundos)
+    buscarDespesas()
   }, [])
 
-  function adicionar() {
-    if (!nova.valor || !nova.data || !nova.fundo) return
-    post('despesas', nova).then(d => {
-      setDespesas([...despesas, d])
-      setNova({ valor: '', data: '', fundo: '', categoria: '', obs: '' })
+  async function buscarDespesas() {
+    try {
+      const dados = await get('despesas')
+      setDespesas(Array.isArray(dados) ? dados : [])
+    } catch (err) {
+      console.error('Erro ao buscar despesas:', err)
+      setSnack({ open: true, msg: 'Erro ao buscar despesas', tipo: 'error' })
+      setDespesas([])
+    }
+  }
+
+  async function salvar() {
+    try {
+      if (!form.descricao || !form.valor || !form.data) {
+        setSnack({ open: true, msg: 'Preencha todos os campos obrigatórios', tipo: 'warning' })
+        return
+      }
+
+      if (editando) {
+        await put(`despesas/${editando}`, form)
+        setSnack({ open: true, msg: 'Despesa atualizada com sucesso!', tipo: 'success' })
+      } else {
+        await post('despesas', form)
+        setSnack({ open: true, msg: 'Despesa cadastrada com sucesso!', tipo: 'success' })
+      }
+
+      limparForm()
+      buscarDespesas()
+    } catch (err) {
+      console.error('Erro ao salvar:', err)
+      setSnack({ open: true, msg: 'Erro ao salvar despesa', tipo: 'error' })
+    }
+  }
+
+  async function deletarDespesa(id) {
+    if (!confirm('Deseja realmente deletar esta despesa?')) return
+
+    try {
+      await del(`despesas/${id}`)
+      setSnack({ open: true, msg: 'Despesa deletada com sucesso!', tipo: 'success' })
+      buscarDespesas()
+    } catch (err) {
+      console.error('❌ Erro ao deletar:', err)
+      setSnack({ open: true, msg: 'Erro ao deletar despesa', tipo: 'error' })
+    }
+  }
+
+  function editarDespesa(desp) {
+    setForm({
+      descricao: desp.descricao || '',
+      valor: desp.valor || '',
+      data: desp.data ? desp.data.split('T')[0] : new Date().toISOString().split('T')[0],
+      categoria: desp.categoria || '',
+      forma_pagamento: desp.forma_pagamento || 'Dinheiro',
+      favorecido: desp.favorecido || '',
+      observacoes: desp.observacoes || '',
+      status: desp.status || 'pendente'
     })
+    setEditando(desp.id)
+  }
+
+  function limparForm() {
+    setForm({
+      descricao: '',
+      valor: '',
+      data: new Date().toISOString().split('T')[0],
+      categoria: '',
+      forma_pagamento: 'Dinheiro',
+      favorecido: '',
+      observacoes: '',
+      status: 'pendente'
+    })
+    setEditando(null)
+  }
+
+  // Funções auxiliares para formatação
+  function formatarValor(valor) {
+    const num = parseFloat(valor)
+    return isNaN(num) ? 'R$ 0,00' : `R$ ${num.toFixed(2).replace('.', ',')}`
+  }
+
+  function formatarData(dataStr) {
+    if (!dataStr) return 'Data inválida'
+    try {
+      const data = new Date(dataStr)
+      // Adiciona 1 dia para corrigir timezone
+      data.setDate(data.getDate() + 1)
+      return data.toLocaleDateString('pt-BR')
+    } catch {
+      return 'Data inválida'
+    }
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        mt: 5,
-        px: 2,
-        minHeight: '100vh',
-        background: 'linear-gradient(145deg, #fdfaf6, #f0f7f4)',
-        pb: 5,
-      }}
-    >
-      <Paper
-        elevation={4}
-        sx={{
-          p: 4,
-          borderRadius: 4,
-          width: '100%',
-          maxWidth: 700,
-          backgroundColor: '#ffffffdd',
-          backdropFilter: 'blur(6px)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
-        }}
+    <Box sx={{ p: 4, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
+        💰 Gerenciar Despesas
+      </Typography>
+
+      {/* FORMULÁRIO */}
+      <MotionPaper
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        sx={{ p: 3, mb: 4 }}
       >
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ mb: 3 }}
-        >
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#2c3e50' }}>
-            💰 Controle de Despesas
-          </Typography>
-          <Tooltip title="Adicionar nova despesa">
-            <IconButton color="primary" onClick={adicionar}>
-              <AddCircleIcon sx={{ fontSize: 30, color: '#66A5AD' }} />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-
-        {/* FORMULÁRIO */}
-        <Stack spacing={2}>
-          <TextField
-            label="Valor (R$)"
-            type="number"
-            value={nova.valor}
-            onChange={e => setNova({ ...nova, valor: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="Data"
-            type="date"
-            value={nova.data}
-            onChange={e => setNova({ ...nova, data: e.target.value })}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-          />
-          <FormControl fullWidth>
-            <InputLabel>Fundo</InputLabel>
-            <Select
-              value={nova.fundo}
-              label="Fundo"
-              onChange={e => setNova({ ...nova, fundo: e.target.value })}
-            >
-              <MenuItem value="">Selecione o Fundo</MenuItem>
-              {fundos.map(f => (
-                <MenuItem key={f.id} value={f.nome}>
-                  {f.nome}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Categoria"
-            value={nova.categoria}
-            onChange={e => setNova({ ...nova, categoria: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="Observação"
-            value={nova.obs}
-            onChange={e => setNova({ ...nova, obs: e.target.value })}
-            fullWidth
-            multiline
-          />
-
-          <Button
-            variant="contained"
-            startIcon={<AddCircleIcon />}
-            onClick={adicionar}
-            sx={{
-              mt: 1,
-              py: 1.2,
-              fontWeight: 600,
-              background: 'linear-gradient(90deg, #66A5AD, #8C6BB1)',
-              '&:hover': { background: 'linear-gradient(90deg, #5a929a, #7a5da3)' },
-            }}
-          >
-            Adicionar Despesa
-          </Button>
-        </Stack>
-
-        <Divider sx={{ my: 4 }} />
-
-        {/* LISTA DE DESPESAS */}
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#2c3e50' }}>
-          🧾 Lista de Despesas
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          {editando ? '✏️ Editar Despesa' : '➕ Nova Despesa'}
         </Typography>
+        <Divider sx={{ mb: 3 }} />
 
         <Grid container spacing={2}>
-          <AnimatePresence>
-            {despesas.map(d => (
-              <Grid item xs={12} key={d.id}>
-                <MotionCard
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                  elevation={3}
-                  sx={{
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    bgcolor: '#fefefe',
-                    backgroundImage: 'linear-gradient(145deg, #f9f9f9, #f4f4f4)',
-                  }}
-                >
-                  <CardHeader
-                    avatar={
-                      <Avatar sx={{ bgcolor: '#8C6BB1' }}>
-                        <AttachMoneyIcon />
-                      </Avatar>
-                    }
-                    title={
-                      <Typography sx={{ fontWeight: 700, color: '#2c3e50' }}>
-                        R$ {Number(d.valor).toLocaleString('pt-BR')}
-                      </Typography>
-                    }
-                    subheader={
-                      <Typography sx={{ color: '#7f8c8d' }}>
-                        {d.data} • {d.fundo}
-                      </Typography>
-                    }
-                  />
-                  <CardContent sx={{ pt: 0 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Categoria:</strong> {d.categoria || '—'}
-                    </Typography>
-                    {d.obs && (
-                      <Typography variant="body2" sx={{ mt: 0.5 }}>
-                        {d.obs}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </MotionCard>
-              </Grid>
-            ))}
-          </AnimatePresence>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Descrição *"
+              value={form.descricao}
+              onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              fullWidth
+              label="Valor *"
+              type="number"
+              value={form.valor}
+              onChange={(e) => setForm({ ...form, valor: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              fullWidth
+              label="Data *"
+              type="date"
+              value={form.data}
+              onChange={(e) => setForm({ ...form, data: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <FormControl fullWidth>
+              <InputLabel>Categoria</InputLabel>
+              <Select
+                value={form.categoria}
+                label="Categoria"
+                onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+              >
+                <MenuItem value="">Nenhuma</MenuItem>
+                {categorias.map((cat) => (
+                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <FormControl fullWidth>
+              <InputLabel>Forma de Pagamento</InputLabel>
+              <Select
+                value={form.forma_pagamento}
+                label="Forma de Pagamento"
+                onChange={(e) => setForm({ ...form, forma_pagamento: e.target.value })}
+              >
+                {formasPagamento.map((fp) => (
+                  <MenuItem key={fp} value={fp}>{fp}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={form.status}
+                label="Status"
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+              >
+                {statusOptions.map((st) => (
+                  <MenuItem key={st} value={st}>{st}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Favorecido"
+              value={form.favorecido}
+              onChange={(e) => setForm({ ...form, favorecido: e.target.value })}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Observações"
+              value={form.observacoes}
+              onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+            />
+          </Grid>
         </Grid>
-      </Paper>
+
+        <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+          <Button variant="contained" startIcon={editando ? <EditIcon /> : <AddIcon />} onClick={salvar}>
+            {editando ? 'Atualizar' : 'Cadastrar'}
+          </Button>
+          {editando && (
+            <Button variant="outlined" onClick={limparForm}>
+              Cancelar
+            </Button>
+          )}
+        </Stack>
+      </MotionPaper>
+
+      {/* TABELA */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+              <TableCell><strong>ID</strong></TableCell>
+              <TableCell><strong>Descrição</strong></TableCell>
+              <TableCell><strong>Valor</strong></TableCell>
+              <TableCell><strong>Data</strong></TableCell>
+              <TableCell><strong>Categoria</strong></TableCell>
+              <TableCell><strong>Forma Pgto</strong></TableCell>
+              <TableCell><strong>Favorecido</strong></TableCell>
+              <TableCell><strong>Status</strong></TableCell>
+              <TableCell align="center"><strong>Ações</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {despesas.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    Nenhuma despesa cadastrada
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              despesas.map((desp) => (
+                <TableRow key={desp.id} hover>
+                  <TableCell>{desp.id}</TableCell>
+                  <TableCell>{desp.descricao}</TableCell>
+                  <TableCell>{formatarValor(desp.valor)}</TableCell>
+                  <TableCell>{formatarData(desp.data)}</TableCell>
+                  <TableCell>{desp.categoria || '-'}</TableCell>
+                  <TableCell>{desp.forma_pagamento || '-'}</TableCell>
+                  <TableCell>{desp.favorecido || '-'}</TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        bgcolor: desp.status === 'pago' ? '#e8f5e9' : '#fff3e0',
+                        color: desp.status === 'pago' ? '#2e7d32' : '#e65100'
+                      }}
+                    >
+                      {desp.status}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <IconButton size="small" color="primary" onClick={() => editarDespesa(desp)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => deletarDespesa(desp.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* SNACKBAR */}
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={4000}
+        onClose={() => setSnack({ ...snack, open: false })}
+      >
+        <Alert severity={snack.tipo} onClose={() => setSnack({ ...snack, open: false })}>
+          {snack.msg}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

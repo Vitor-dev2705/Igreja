@@ -1,39 +1,18 @@
 import { useState, useEffect } from 'react'
+import { get } from '../api'
 import {
-  Box,
-  Grid,
-  Card,
-  Typography,
-  Paper,
-  Stack,
-  Divider,
-  AppBar,
-  Toolbar,
-  MenuItem,
-  Select,
-  Avatar,
-  IconButton
+  Box, Grid, Card, Typography, Paper, Stack, Divider,
+  AppBar, Toolbar, MenuItem, Select
 } from '@mui/material'
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import SettingsIcon from '@mui/icons-material/Settings'
 import { motion } from 'framer-motion'
 
-// Criando componentes animados a partir do Material-UI
 const MotionCard = motion(Card)
 const MotionPaper = motion(Paper)
 
@@ -46,6 +25,7 @@ export default function Dashboard() {
     receitaDespesaData: [],
     vendasComprasData: [],
     despesasPorCategoria: [],
+    doacoesPorFundo: [] // ✅ ADICIONAR
   })
 
   const [periodo, setPeriodo] = useState('Mensal')
@@ -53,8 +33,11 @@ export default function Dashboard() {
   useEffect(() => {
     async function buscarDados() {
       try {
-        const res = await fetch('http://localhost:3001/dashboard')
-        const dados = await res.json()
+        console.log('Buscando dados do dashboard...')
+        const dados = await get('dashboard')
+        
+        console.log('Dados recebidos:', dados)
+        
         setDashboard({
           vendasHoje: dados.vendasHoje || 0,
           planoHoje: dados.planoHoje || 0,
@@ -63,6 +46,7 @@ export default function Dashboard() {
           receitaDespesaData: dados.receitaDespesaData || [],
           vendasComprasData: dados.vendasComprasData || [],
           despesasPorCategoria: dados.despesasPorCategoria || [],
+          doacoesPorFundo: dados.doacoesPorFundo || [] // ✅ ADICIONAR
         })
       } catch (err) {
         console.error('Erro ao buscar dados do dashboard:', err)
@@ -71,7 +55,7 @@ export default function Dashboard() {
     buscarDados()
   }, [])
 
-  const cardColors = ['#FFDAB9', '#FFE4B5', '#B0E0E6', '#E6E6FA'] // cores pastéis
+  const cardColors = ['#FFDAB9', '#FFE4B5', '#B0E0E6', '#E6E6FA']
 
   return (
     <Box
@@ -125,9 +109,9 @@ export default function Dashboard() {
       <Box sx={{ p: 4 }}>
         <Grid container spacing={4}>
           {[
-            { cor: cardColors[0], titulo: 'Vendas Hoje', valor: dashboard.vendasHoje, icone: <TrendingUpIcon sx={{ fontSize: 45, color: '#FF7F50' }} /> },
-            { cor: cardColors[1], titulo: 'A Pagar Hoje', valor: dashboard.planoHoje, icone: <AttachMoneyIcon sx={{ fontSize: 45, color: '#FFA500' }} /> },
-            { cor: cardColors[2], titulo: 'A Receber Hoje', valor: dashboard.receitaHoje, icone: <TrendingUpIcon sx={{ fontSize: 45, color: '#1E90FF' }} /> },
+            { cor: cardColors[0], titulo: 'Doações Hoje', valor: dashboard.vendasHoje, icone: <TrendingUpIcon sx={{ fontSize: 45, color: '#FF7F50' }} /> },
+            { cor: cardColors[1], titulo: 'Despesas Hoje', valor: dashboard.planoHoje, icone: <AttachMoneyIcon sx={{ fontSize: 45, color: '#FFA500' }} /> },
+            { cor: cardColors[2], titulo: 'Receita Hoje', valor: dashboard.receitaHoje, icone: <TrendingUpIcon sx={{ fontSize: 45, color: '#1E90FF' }} /> },
             { cor: cardColors[3], titulo: 'Faturamento do Mês', valor: dashboard.pagamentoMes, icone: <AttachMoneyIcon sx={{ fontSize: 45, color: '#9370DB' }} /> },
           ].map((card, idx) => (
             <Grid item xs={12} sm={6} md={3} key={idx}>
@@ -169,27 +153,27 @@ export default function Dashboard() {
               sx={{ p: 4, borderRadius: 16, boxShadow: '0 6px 20px rgba(0,0,0,0.15)', background: '#fff' }}
             >
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2c3e50' }}>
-                Receita x Despesa
+                Receita x Despesa (Últimos 12 meses)
               </Typography>
               <ResponsiveContainer width="100%" height={350}>
                 <AreaChart data={dashboard.receitaDespesaData}>
                   <defs>
-                    {['#FF7F50', '#FFA500', '#1E90FF', '#9370DB'].map((cor, i) => (
-                      <linearGradient key={i} id={`color${i}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={cor} stopOpacity={0.4} />
-                        <stop offset="95%" stopColor={cor} stopOpacity={0.1} />
-                      </linearGradient>
-                    ))}
+                    <linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2ecc71" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#2ecc71" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="colorDespesa" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#e74c3c" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#e74c3c" stopOpacity={0.1} />
+                    </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="mes" stroke="#7f8c8d" />
                   <YAxis stroke="#7f8c8d" />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="2022" stroke="#FF7F50" fill="url(#color0)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="2023" stroke="#FFA500" fill="url(#color1)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="2024" stroke="#1E90FF" fill="url(#color2)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="2025" stroke="#9370DB" fill="url(#color3)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="receita" stroke="#2ecc71" fill="url(#colorReceita)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="despesa" stroke="#e74c3c" fill="url(#colorDespesa)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </MotionPaper>
@@ -227,11 +211,56 @@ export default function Dashboard() {
               <Divider sx={{ my: 2 }} />
               <Grid container spacing={1}>
                 {dashboard.despesasPorCategoria.map((cat, idx) => (
-                  <Grid item xs={6} key={idx}>
+                  <Grid item xs={12} key={idx}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: cat.cor }} />
                       <Typography variant="caption" sx={{ fontSize: 13, color: '#2c3e50' }}>
-                        {cat.nome}
+                        {cat.nome} ({cat.valor}%)
+                      </Typography>
+                    </Stack>
+                  </Grid>
+                ))}
+              </Grid>
+            </MotionPaper>
+          </Grid>
+
+          {/* ✅ DOAÇÕES POR FUNDO */}
+          <Grid item xs={12} md={6}>
+            <MotionPaper
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.5 }}
+              sx={{ p: 4, borderRadius: 16, boxShadow: '0 6px 20px rgba(0,0,0,0.15)', background: '#fff' }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2c3e50' }}>
+                Doações por Fundo (Top 5)
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={dashboard.doacoesPorFundo}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="valor"
+                  >
+                    {dashboard.doacoesPorFundo.map((entry, index) => (
+                      <Cell key={`cell-fundo-${index}`} fill={entry.cor} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
+              </ResponsiveContainer>
+              <Divider sx={{ my: 2 }} />
+              <Grid container spacing={1}>
+                {dashboard.doacoesPorFundo.map((fundo, idx) => (
+                  <Grid item xs={12} key={idx}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: fundo.cor }} />
+                      <Typography variant="caption" sx={{ fontSize: 13, color: '#2c3e50' }}>
+                        {fundo.nome} ({fundo.valor}%)
                       </Typography>
                     </Stack>
                   </Grid>
